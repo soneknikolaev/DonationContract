@@ -17,18 +17,33 @@ contract Donation is Management {
         _;
     }
 
-    function getDonationAfterCommission(string memory roomName) public view returns(uint256) {
+    function getDonationAfterCommission(string memory roomName)
+        public
+        view
+        roomExist(roomName)
+        returns(uint256) 
+    {
         RoomInfo storage room = rooms[roomName];
         return room.donation.sub(room.donation.div(COMMISSION));
     }
 
-    function donate(string memory roomName) public payable canDonate(roomName) {
+    function donate(string memory roomName)
+        public
+        payable
+        roomExist(roomName)
+        canDonate(roomName)
+    {
         rooms[roomName].donation = rooms[roomName].donation.add(msg.value);
         rooms[roomName].participants.push(msg.sender);
         emit Donated(msg.sender, roomName, msg.value);
     }
 
-    function withdraw(string memory roomName, address payable to) public payable onlyRoomOwner(roomName) {
+    function withdraw(string memory roomName, address payable to)
+        public
+        payable
+        roomExist(roomName)
+        onlyRoomOwner(roomName)
+    {
         require(rooms[roomName].active == false, "You mush finish fundraising");
 
         to.transfer(
@@ -37,4 +52,5 @@ contract Donation is Management {
 
         deleteRoom(roomName);
     }
+
 }

@@ -16,13 +16,19 @@ contract Room {
 
     event RoomDeleted(address initiator, string roomName);
 
+    uint internal _totalRooms = 0;
+
     mapping(string => RoomInfo) internal rooms;
     string[] internal names;
 
     constructor() {}
 
+    modifier roomExist(string memory roomName) {
+        require(rooms[roomName].created, "Room is not exist");
+        _;
+    }
+
     modifier canCreateRoom(string memory roomName) {
-        require(rooms[roomName].created != true, "The room with this name is already created");
         require(msg.value >= 1000, "First donation is very small");
         _;
     }
@@ -36,7 +42,12 @@ contract Room {
         return rooms[roomName];
     }
 
-    function createRoom(string memory roomName) public payable canCreateRoom(roomName) {
+    function createRoom(string memory roomName)
+        public
+        payable
+        roomExist(roomName)
+        canCreateRoom(roomName)
+    {
         rooms[roomName] = RoomInfo({
             donation: msg.value,
             owner: msg.sender,
@@ -50,17 +61,25 @@ contract Room {
         emit RoomCreated(msg.sender, roomName);
     }
 
-    function startRoomFundraising(string memory roomName) public onlyRoomOwner(roomName) {
+    function startRoomFundraising(string memory roomName)
+        public
+        roomExist(roomName)
+        onlyRoomOwner(roomName)
+    {
         rooms[roomName].active = true;
         emit RoomUpdated(msg.sender, rooms[roomName]);
     }
 
-    function finishRoomFundraising(string memory roomName) public onlyRoomOwner(roomName) {
+    function finishRoomFundraising(string memory roomName) 
+        public
+        roomExist(roomName)
+        onlyRoomOwner(roomName)
+    {
         rooms[roomName].active = false;
         emit RoomUpdated(msg.sender, rooms[roomName]);
     }
 
-    function deleteRoom(string memory roomName) internal {
+    function deleteRoom(string memory roomName) internal roomExist(roomName) {
         string[] memory newNames;
         delete rooms[roomName];
 
@@ -76,7 +95,11 @@ contract Room {
         emit RoomDeleted(msg.sender, roomName);
     }
 
-    function transferRoomOwnership(string memory roomName, address newOwner) public onlyRoomOwner(roomName) {
+    function transferRoomOwnership(string memory roomName, address newOwner)
+        public
+        roomExist(roomName)
+        onlyRoomOwner(roomName)
+    {
         rooms[roomName].owner = newOwner;
         emit RoomUpdated(msg.sender, rooms[roomName]);
     }

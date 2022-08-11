@@ -16,8 +16,6 @@ contract Room {
 
     event RoomDeleted(address initiator, string roomName);
 
-    uint internal _totalRooms = 0;
-
     mapping(string => RoomInfo) internal rooms;
     string[] internal names;
 

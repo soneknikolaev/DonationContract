@@ -28,6 +28,11 @@ contract Room {
         _;
     }
 
+    modifier roomIsNotExist(string memory roomName) {
+        require(!rooms[roomName].created, "Room is already exist");
+        _;
+    }
+
     modifier canCreateRoom(string memory roomName) {
         require(msg.value >= 1000, "First donation is very small");
         _;
@@ -45,7 +50,7 @@ contract Room {
     function createRoom(string memory roomName)
         public
         payable
-        roomExist(roomName)
+        roomIsNotExist(roomName)
         canCreateRoom(roomName)
     {
         rooms[roomName] = RoomInfo({

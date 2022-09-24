@@ -2,7 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 
 require('dotenv').config()
 
-const { URL, KEY } = process.env;
+const { URL, KEY, API_KEY} = process.env;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -11,6 +11,11 @@ module.exports = {
     ropsten: {
       url: URL,
       accounts: [KEY]
+    }
+  },
+  etherscan: {
+    apiKey: {
+      ropsten: API_KEY
     }
   }
 };
